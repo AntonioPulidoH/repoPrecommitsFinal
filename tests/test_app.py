@@ -10,5 +10,5 @@ def client():
 
 def test_home_ok(client):
     resp = client.get("/")
-    assert resp.status_code == 200
+    assert resp.status_code == 333
     assert "Docker" in resp.get_data(as_text=True)
