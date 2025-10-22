@@ -8,7 +8,32 @@ def client():
     return flask_app.test_client()
 
 
-def test_home_ok(client):
-    resp = client.get("/")
-    assert resp.status_code == 200
-    assert "Docker" in resp.get_data(as_text=True)
+import json
+import app as app_module
+
+def test_homepage_renders():
+    """Comprueba que la página principal carga correctamente."""
+    app = app_module.app
+    client = app.test_client()
+    r = client.get("/")
+    assert r.status_code == 200
+    assert b"Mini To-Do" in r.data  
+
+def test_create_task_api():
+    """Comprueba creación y listado de tareas vía API."""
+    app_module.TAREAS.clear()  
+    app = app_module.app
+    client = app.test_client()
+
+    # crear tarea
+    r = client.post("/api/tareas", json={"texto": "Probar test"})
+    assert r.status_code == 201
+    data = r.get_json()
+    assert data["ok"] is True
+    assert data["data"]["texto"] == "Probar test"
+
+    # listar y verificar
+    r = client.get("/api/tareas")
+    listado = r.get_json()["data"]
+    assert len(listado) == 1
+    assert listado[0]["texto"] == "Probar test"
